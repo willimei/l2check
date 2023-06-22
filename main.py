@@ -1,5 +1,8 @@
+import scapy.config
+
 from lib.readconfig import *
 from lib.interfaces import *
+from lib.connectivity import *
 from scapy.all import *
 import ipaddress
 import os
@@ -22,35 +25,32 @@ def initialize(configfilename):
         ipr.link('set', index=ifindex, net_ns_fd=namespace)
 
         add_ip(ifname, ip, ip4network.prefixlen, namespace)
+        #all_ifup_netns(namespace)
+        ifup(ifname, namespace)
 
     ipr.close()
 
     os.system('echo 1 > /proc/sys/net/ipv4/conf/all/arp_ignore')
     os.system('echo 1 > /proc/sys/net/ipv4/conf/all/arp_filter')
 
+    scapy.config.conf.ifaces.reload()
+    scapy.config.conf.route.resync()
+
 
 def check_base_connectivity():
-    ans, unans = srp(Ether(dst='ff:ff:ff:ff:ff:ff')/ARP(pdst=ip4network.with_prefixlen),
-                     iface=Interfaces[0],
-                     timeout=2)
-    print(ans)
-    print(unans)
-
+    check_neighbors(Interfaces[0], ip4network)
 
 
 def teardown():
     for index, (i, ip) in enumerate(zip(Interfaces, ip4network.hosts())):
         namespace = f'host{index}'
         netns.remove(namespace)
-        #remove_ip(i.description, ip, ip4network.prefixlen)
-        #'/proc/1/ns/net'
 
 
 def main():
     try:
         initialize('config.txt')
-        #check_base_connectivity()
-        time.sleep(5)
+        check_base_connectivity()
     finally:
         teardown()
         pass
