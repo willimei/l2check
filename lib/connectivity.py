@@ -4,8 +4,8 @@ from scapy.all import *
 import ipaddress
 
 
-def arping_neighbors(interface, ip4network):
-    with netns.NetNS(nsname='host0'):
+def arping_neighbors(interface, namespace: str, ip4network):
+    with netns.NetNS(nsname=namespace):
         conf.ifaces.reload()
         conf.route.resync()
         p = Ether(dst='ff:ff:ff:ff:ff:ff')/ARP(pdst=ip4network.with_prefixlen)
@@ -19,11 +19,11 @@ def arping_neighbors(interface, ip4network):
         return ans
 
 
-def get_async_sniffer(interfaces: list, index: int, filterstr: str):
-    with netns.NetNS(nsname=f'host{index}'):
+def get_async_sniffer(interfaces: list, ifindex: int, filterstr: str):
+    with netns.NetNS(nsname=f'host{ifindex}'):
         conf.ifaces.reload()
         conf.route.resync()
-        sniffer = AsyncSniffer(iface=interfaces[index], filter=filterstr)
+        sniffer = AsyncSniffer(iface=interfaces[ifindex], filter=filterstr)
         sniffer.start()
 
         return sniffer

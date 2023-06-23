@@ -43,7 +43,7 @@ def check_base_connectivity():
         filterstr = f'arp and ether dst {Interfaces[0].mac} and ether src {Interfaces[i].mac}'
         sniffer.append(get_async_sniffer(Interfaces, i, filterstr))
 
-    ans = arping_neighbors(Interfaces[0], ip4network)
+    ans = arping_neighbors(Interfaces[0], 'host0', ip4network)
 
     for s in sniffer:
         s.stop()
