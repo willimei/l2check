@@ -4,7 +4,7 @@ from scapy.all import *
 import ipaddress
 
 
-def arping_neighbors(interface, namespace: str, ip4network):
+def arping_neighbors(interface: NetworkInterface, namespace: str, ip4network: ipaddress.IPv4Address|str) -> SndRcvList:
     with netns.NetNS(nsname=namespace):
         conf.ifaces.reload()
         conf.route.resync()
@@ -19,7 +19,7 @@ def arping_neighbors(interface, namespace: str, ip4network):
         return ans
 
 
-def get_async_sniffer(interfaces: list, ifindex: int, filterstr: str):
+def get_async_sniffer(interfaces: list[NetworkInterface], ifindex: int, filterstr: str):
     with netns.NetNS(nsname=f'host{ifindex}'):
         conf.ifaces.reload()
         conf.route.resync()

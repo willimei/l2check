@@ -6,21 +6,20 @@ from lib.connectivity import *
 from scapy.all import *
 import ipaddress
 import os
-from pyroute2 import netns, IPRoute
+from pyroute2 import netns as pyrouteNetns, IPRoute
+import netns
 
 Interfaces = []
 ip4network = ipaddress.ip_network('192.168.3.0/24')
 
 
-def initialize(configfilename):
+def initialize(configfilename='config.txt'):
     ipr = IPRoute()
     interfaces = read_interfaces(configfilename)
     for index, (ifname, ip) in enumerate(zip(interfaces, ip4network.hosts())):
         namespace = f'host{index}'
-        intf = dev_from_networkname(ifname)
-        Interfaces.append(intf)
 
-        netns.create(namespace)
+        pyrouteNetns.create(namespace)
         ifindex = ipr.link_lookup(ifname=ifname)[0]
         ipr.link('set', index=ifindex, net_ns_fd=namespace)
 
@@ -28,13 +27,18 @@ def initialize(configfilename):
         #all_ifup_netns(namespace)
         ifup(ifname, namespace)
 
+        with netns.NetNS(nsname=namespace):
+            scapy.config.conf.ifaces.reload()
+            scapy.config.conf.route.resync()
+            intf = dev_from_networkname(ifname)
+            Interfaces.append(intf)
+
+
     ipr.close()
 
     os.system('echo 1 > /proc/sys/net/ipv4/conf/all/arp_ignore')
     os.system('echo 1 > /proc/sys/net/ipv4/conf/all/arp_filter')
 
-    scapy.config.conf.ifaces.reload()
-    scapy.config.conf.route.resync()
 
 
 def check_base_connectivity():
@@ -69,7 +73,7 @@ def check_base_connectivity():
 def teardown():
     for index, (i, ip) in enumerate(zip(Interfaces, ip4network.hosts())):
         namespace = f'host{index}'
-        netns.remove(namespace)
+        pyrouteNetns.remove(namespace)
 
 
 def main():
