@@ -18,6 +18,15 @@ def arping_neighbors(interface: NetworkInterface, namespace: str, ip4network: ip
 
         return ans
 
+def arping(interfaces: list[NetworkInterface], ifindex: int, ip: ipaddress.IPv4Address|str) -> SndRcvList:
+    with netns.NetNS(nsname=f'host{ifindex}'):
+        conf.ifaces.reload()
+        conf.route.resync()
+        p = Ether(dst='ff:ff:ff:ff:ff:ff')/ARP(pdst=str(ip))
+        ans, _ = srp(p, iface=interfaces[ifindex], timeout=2)
+
+        return ans
+
 
 def get_async_sniffer(interfaces: list[NetworkInterface], ifindex: int, filterstr: str):
     with netns.NetNS(nsname=f'host{ifindex}'):

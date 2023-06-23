@@ -6,6 +6,7 @@ from lib.connectivity import *
 from scapy.all import *
 import ipaddress
 import os
+from attacks.arp_cache_poison import ArpCachePoison
 from pyroute2 import netns as pyrouteNetns, IPRoute
 import netns
 
@@ -80,6 +81,9 @@ def main():
     try:
         initialize('config.txt')
         check_base_connectivity()
+        poison = ArpCachePoison(Interfaces, ip4network)
+        result = poison.run()
+        print(f'Poison: {result}')
     finally:
         teardown()
         pass
