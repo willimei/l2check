@@ -38,7 +38,32 @@ def initialize(configfilename):
 
 
 def check_base_connectivity():
-    check_neighbors(Interfaces[0], ip4network)
+    sniffer = []
+    for i in range(1,4):
+        filterstr = f'arp and ether dst {Interfaces[0].mac} and ether src {Interfaces[i].mac}'
+        sniffer.append(get_async_sniffer(Interfaces, i, filterstr))
+
+    ans = arping_neighbors(Interfaces[0], ip4network)
+
+    for s in sniffer:
+        s.stop()
+
+    ans_macs = []
+    for res in ans.res:
+        ans_macs.append(res.answer.src)
+    if (not ans_macs.__contains__(Interfaces[1].mac)) or \
+            (not ans_macs.__contains__(Interfaces[2].mac)):
+        raise SystemExit('Physical setup not valid. No ARP response.')
+
+    if (ans_macs.__contains__(Interfaces[3].mac)) and (len(sniffer[2].results.res) != 0):
+        raise SystemExit('Physical setup not valid. ARP response from isolated interface.')
+
+    for i in range(2):
+        if len(sniffer[i].results.res) != 1:
+            print(sniffer[i].results.res)
+            raise SystemExit('Physical setup not valid. ARP response from external Interface.')
+
+
 
 
 def teardown():

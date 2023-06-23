@@ -1,5 +1,4 @@
 import errno
-
 from pyroute2 import NDB, IPRoute, NetlinkError, netns
 import ipaddress
 
@@ -25,7 +24,7 @@ def ifup(ifname: str, namespace: str):
     ipr = IPRoute()
     ifindex = ipr.link_lookup(ifname=ifname)[0]
     ipr.link('set', index=ifindex, state='up')
-    ipr.poll(ipr.link_lookup, '', ifname=ifname, operstate='UP')
+    ipr.poll(ipr.link_lookup, '', ifname=ifname, operstate='UP', timeout=20)
     ipr.close()
     netns.popns()
 
