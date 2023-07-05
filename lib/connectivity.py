@@ -1,15 +1,14 @@
 import netns
-from scapy.config import conf
-from scapy.all import *
+import scapy.all as scapy
 import ipaddress
 
 
-def arping_neighbors(interface: NetworkInterface, namespace: str, ip4network: ipaddress.IPv4Address|str) -> SndRcvList:
+def arping_neighbors(interface: scapy.NetworkInterface, namespace: str, ip4network: ipaddress.IPv4Address|str) -> scapy.SndRcvList:
     with netns.NetNS(nsname=namespace):
-        conf.ifaces.reload()
-        conf.route.resync()
-        p = Ether(dst='ff:ff:ff:ff:ff:ff')/ARP(pdst=ip4network.with_prefixlen)
-        ans, unans = srp(p,
+        scapy.conf.ifaces.reload()
+        scapy.conf.route.resync()
+        p = scapy.Ether(dst='ff:ff:ff:ff:ff:ff')/scapy.ARP(pdst=ip4network.with_prefixlen)
+        ans, unans = scapy.srp(p,
                          iface=interface,
                          timeout=2)
         print(ans)
@@ -18,21 +17,51 @@ def arping_neighbors(interface: NetworkInterface, namespace: str, ip4network: ip
 
         return ans
 
-def arping(interfaces: list[NetworkInterface], ifindex: int, ip: ipaddress.IPv4Address|str) -> SndRcvList:
+def arping(interfaces: list[scapy.NetworkInterface], ifindex: int, ip: ipaddress.IPv4Address|str) -> scapy.SndRcvList:
     with netns.NetNS(nsname=f'host{ifindex}'):
-        conf.ifaces.reload()
-        conf.route.resync()
-        p = Ether(dst='ff:ff:ff:ff:ff:ff')/ARP(pdst=str(ip))
-        ans, _ = srp(p, iface=interfaces[ifindex], timeout=2)
+        scapy.conf.ifaces.reload()
+        scapy.conf.route.resync()
+        p = scapy.Ether(dst='ff:ff:ff:ff:ff:ff')/scapy.ARP(pdst=str(ip))
+        ans, _ = scapy.srp(p, iface=interfaces[ifindex], timeout=2)
 
         return ans
 
-
-def get_async_sniffer(interfaces: list[NetworkInterface], ifindex: int, filterstr: str):
+def icmping(interfaces: list[scapy.NetworkInterface], ifindex: int, ip: ipaddress.IPv4Address|str, count: int = 3, retry: int = 2) -> scapy.SndRcvList:
     with netns.NetNS(nsname=f'host{ifindex}'):
-        conf.ifaces.reload()
-        conf.route.resync()
-        sniffer = AsyncSniffer(iface=interfaces[ifindex], filter=filterstr)
-        sniffer.start()
+        scapy.conf.ifaces.reload()
+        scapy.conf.route.resync()
+        ans, _ = scapy.srloop(scapy.IP(dst=ip)/scapy.ICMP(), timeout=3,count=count, retry=retry)
 
-        return sniffer
+        return ans
+
+def get_async_sniffer(interfaces: list[scapy.NetworkInterface], ifindex: int, filterstr: str):
+    sniffer = AsyncSniffer(namespace=f'host{ifindex}', iface=interfaces[ifindex], filter=filterstr)
+
+    return sniffer
+
+
+class AsyncSniffer(scapy.AsyncSniffer):
+    def __init__(self, namespace, *args, **kwargs):
+        self.namespace = namespace
+        with netns.NetNS(nsname=self.namespace):
+            scapy.conf.ifaces.reload()
+            scapy.conf.route.resync()
+            super().__init__(*args, **kwargs)
+
+    def join(self, *args, **kwargs):  # type: (*Any, **Any) -> None:
+        with netns.NetNS(nsname=self.namespace):
+            scapy.conf.ifaces.reload()
+            scapy.conf.route.resync()
+            super().join(*args, **kwargs)
+
+    def start(self):  # type: () -> None:
+        with netns.NetNS(nsname=self.namespace):
+            scapy.conf.ifaces.reload()
+            scapy.conf.route.resync()
+            super().start()
+
+    def stop(self, join=True):  # type: (bool) -> Optional[PacketList]|None:
+        with netns.NetNS(nsname=self.namespace):
+            scapy.conf.ifaces.reload()
+            scapy.conf.route.resync()
+            super().stop(join=join)
