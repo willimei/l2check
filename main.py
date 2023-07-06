@@ -99,7 +99,7 @@ def main():
     poison = ArpCachePoison(l2check.Interfaces, l2check.ip4network)
     result = poison.run()
     print(f'Poison: {result}')
-    vlanHopping = VlanHopping(l2check.Interfaces, l2check.ip4network, 1, 2, l2check.Interfaces[1].ip)
+    vlanHopping = VlanHopping(l2check.Interfaces, l2check.ip4network, 1, 2, l2check.Interfaces[3].ip)
     result = vlanHopping.run()
     print(f'VLAN Hopping: {result}')
 
