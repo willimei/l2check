@@ -37,7 +37,7 @@ class L2CheckSuite:
 
     def check_base_connectivity(self):
         retry_count = 0
-        retrys = 3
+        retrys = 50
         sniffer = []
         for i in range(1,4):
             filterstr = f'arp and ether dst {self.Interfaces[0].mac} and ether src {self.Interfaces[i].mac}'
@@ -48,7 +48,7 @@ class L2CheckSuite:
 
             for s in sniffer:
                 s.start()
-            time.sleep(1)
+
             ans = arping_neighbors(self.Interfaces[0], 'host0', self.ip4network)
 
             for s in sniffer:
@@ -73,6 +73,9 @@ class L2CheckSuite:
 
             if error is None:
                 return True
+
+            retry_count += 1
+            time.sleep(1)
 
         raise error
 
