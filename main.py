@@ -8,6 +8,7 @@ import scapy.config
 import ipaddress
 from attacks.arp_cache_poison import ArpCachePoison
 from attacks.vlan_hopping import VlanHopping
+from attacks.dhcp_starvation import DHCPStarvation
 from pyroute2 import netns as pyrouteNetns, IPRoute
 import netns
 
@@ -102,6 +103,9 @@ def main():
     vlanHopping = VlanHopping(l2check.Interfaces, l2check.ip4network, 1, 2, l2check.Interfaces[3].ip)
     result = vlanHopping.run()
     print(f'VLAN Hopping: {result}')
+    starvation = DHCPStarvation(l2check.Interfaces, l2check.ip4network)
+    result = starvation.run()
+    print(f'Starvation: {result}')
 
 
 if __name__ == '__main__':
