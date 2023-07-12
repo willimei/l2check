@@ -24,8 +24,11 @@ class L2CheckSuite:
             ifindex = ipr.link_lookup(ifname=ifname)[0]
             ipr.link('set', index=ifindex, net_ns_fd=namespace)
 
-            add_ip(ifname, ip, self.ip4network.prefixlen, namespace)
             ifup(ifname, namespace)
+            if self.dhcp:
+                run_dhclient(ifname, namespace)
+            else:
+                add_ip(ifname, ip, self.ip4network.prefixlen, namespace)
 
             with netns.NetNS(nsname=namespace):
                 scapy.config.conf.ifaces.reload()
@@ -81,14 +84,17 @@ class L2CheckSuite:
         raise error
 
     def teardown(self):
-        for index, (i, ip) in enumerate(zip(self.Interfaces, self.ip4network.hosts())):
+        for index, (interface, ip) in enumerate(zip(self.Interfaces, self.ip4network.hosts())):
             namespace = f'host{index}'
+            if self.dhcp:
+                stop_dhclient(interface.name, namespace)
             pyrouteNetns.remove(namespace)
 
 
-    def __init__(self, configfile: str = 'config.txt'):
+    def __init__(self, configfile: str = 'config.txt', dhcp: bool = False):
         self.Interfaces = []
         self.ip4network = ipaddress.ip_network('192.168.3.0/24')
+        self.dhcp = dhcp
         self.initialize(configfile)
         self.check_base_connectivity()
 
@@ -96,7 +102,7 @@ class L2CheckSuite:
         self.teardown()
 
 def main():
-    l2check = L2CheckSuite('config.txt')
+    l2check = L2CheckSuite('config.txt', dhcp=True)
     poison = ArpCachePoison(l2check.Interfaces, l2check.ip4network)
     result = poison.run()
     print(f'Poison: {result}')

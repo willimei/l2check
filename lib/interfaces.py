@@ -1,6 +1,7 @@
 from pyroute2 import NDB, IPRoute
 import ipaddress
 import netns
+import subprocess
 
 
 def add_ip(ifname: str, ipaddress: ipaddress, prefixlen: str, namespace: str):
@@ -9,6 +10,14 @@ def add_ip(ifname: str, ipaddress: ipaddress, prefixlen: str, namespace: str):
         ifindex = ipr.link_lookup(ifname=ifname)[0]
         ipr.addr('add', ifindex, address=str(ipaddress), mask=prefixlen)
         ipr.close()
+
+def run_dhclient(ifname: str, namespace: str):
+    with netns.NetNS(nsname=namespace):
+        subprocess.run(['dhclient', '-pf', f'/var/run/dhclient-{namespace}.pid', ifname], check=True)
+
+def stop_dhclient(ifname: str, namespace: str):
+    with netns.NetNS(nsname=namespace):
+        subprocess.run(['dhclient', '-pf', f'/var/run/dhclient-{namespace}.pid', '-r', ifname], check=True)
 
 def all_ifup_netns(namespace: str):
     with netns.NetNS(nsname=namespace):
