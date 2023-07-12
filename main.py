@@ -37,6 +37,7 @@ class L2CheckSuite:
                 self.Interfaces.append(intf)
 
         ipr.close()
+        print('Initialization successful.')
 
 
     def check_base_connectivity(self):
@@ -76,6 +77,7 @@ class L2CheckSuite:
                     error = RuntimeError('Physical setup not valid. ARP response from external Interface.')
 
             if error is None:
+                print('Initial setup successful.')
                 return True
 
             retry_count += 1
