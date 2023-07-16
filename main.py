@@ -26,7 +26,7 @@ class L2CheckSuite:
 
             ifup(ifname, namespace)
             if self.dhcp:
-                run_dhclient(ifname, namespace)
+                start_dhclient(ifname, namespace)
             else:
                 add_ip(ifname, ip, self.ip4network.prefixlen, namespace)
 

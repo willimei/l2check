@@ -11,7 +11,7 @@ def add_ip(ifname: str, ipaddress: ipaddress, prefixlen: str, namespace: str):
         ipr.addr('add', ifindex, address=str(ipaddress), mask=prefixlen)
         ipr.close()
 
-def run_dhclient(ifname: str, namespace: str):
+def start_dhclient(ifname: str, namespace: str):
     with netns.NetNS(nsname=namespace):
         subprocess.run(['dhclient', '-pf', f'/var/run/dhclient-{namespace}.pid', ifname], check=True)
 
