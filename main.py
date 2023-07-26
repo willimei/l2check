@@ -9,6 +9,7 @@ import ipaddress
 from attacks.arp_cache_poison import ArpCachePoison
 from attacks.vlan_hopping import VlanHopping
 from attacks.dhcp_starvation import DHCPStarvation
+from attacks.dhcp_server import DHCPServer
 from pyroute2 import netns as pyrouteNetns, IPRoute
 import netns
 
@@ -104,7 +105,7 @@ class L2CheckSuite:
         self.teardown()
 
 def main():
-    l2check = L2CheckSuite('config.txt', dhcp=True)
+    l2check = L2CheckSuite('config.txt')
     poison = ArpCachePoison(l2check.Interfaces, l2check.ip4network)
     result = poison.run()
     print(f'Poison: {result}')
@@ -114,6 +115,9 @@ def main():
     starvation = DHCPStarvation(l2check.Interfaces, l2check.ip4network)
     result = starvation.run()
     print(f'Starvation: {result}')
+    dhcp_server = DHCPServer(l2check.Interfaces, l2check.ip4network)
+    result = dhcp_server.run()
+    print(f'DHCP Server: {result}')
 
 
 if __name__ == '__main__':
