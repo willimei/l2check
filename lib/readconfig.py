@@ -2,14 +2,14 @@ import os
 import sys
 
 
-def read_interfaces(filename):
+def read_file_lines(filename):
     f = open(filename, 'r')
-    interfaces = []
+    lines = []
     for line in f.readlines():
-        interface = line.strip('\r\n')
-        interfaces.append(interface)
+        line = line.strip('\r\n')
+        lines.append(line)
     f.close()
-    return interfaces
+    return lines
 
 
 def main():
@@ -22,7 +22,7 @@ def main():
             print(filename + ' access denied')
             exit(1)
         else:
-            read_interfaces(filename)
+            read_file_lines(filename)
             exit(1)
     else:
         print('Provide interface config!')

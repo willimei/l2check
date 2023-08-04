@@ -1,3 +1,4 @@
+import importlib
 import time
 
 from lib.readconfig import *
@@ -6,10 +7,6 @@ from lib.connectivity import *
 import scapy.all as scapy
 import scapy.config
 import ipaddress
-from attacks.arp_cache_poison import ArpCachePoison
-from attacks.vlan_hopping import VlanHopping
-from attacks.dhcp_starvation import DHCPStarvation
-from attacks.dhcp_server import DHCPServer
 from pyroute2 import netns as pyrouteNetns, IPRoute
 import netns
 
@@ -17,7 +14,7 @@ class L2CheckSuite:
 
     def initialize(self, configfilename):
         ipr = IPRoute()
-        interfaces = read_interfaces(configfilename)
+        interfaces = read_file_lines(configfilename)
         for index, (ifname, ip) in enumerate(zip(interfaces, self.ip4network.hosts())):
             namespace = f'host{index}'
 
@@ -106,18 +103,15 @@ class L2CheckSuite:
 
 def main():
     l2check = L2CheckSuite('config.txt')
-    poison = ArpCachePoison(l2check.Interfaces, l2check.ip4network)
-    result = poison.run()
-    print(f'Poison: {result}')
-    vlanHopping = VlanHopping(l2check.Interfaces, l2check.ip4network, 1, 2, l2check.Interfaces[3].ip)
-    result = vlanHopping.run()
-    print(f'VLAN Hopping: {result}')
-    starvation = DHCPStarvation(l2check.Interfaces, l2check.ip4network)
-    result = starvation.run()
-    print(f'Starvation: {result}')
-    dhcp_server = DHCPServer(l2check.Interfaces, l2check.ip4network)
-    result = dhcp_server.run()
-    print(f'DHCP Server: {result}')
+    attacks = read_file_lines('attacks.txt')
+    for attack in attacks:
+        attack_class = getattr(importlib.import_module('attacks.'+attack), attack)
+        attack_instance = attack_class(l2check.Interfaces, l2check.ip4network)
+        try:
+            result = attack_instance.run()
+        except RuntimeError as err:
+            print(err)
+        print(f'{attack}: {result}')
 
 
 if __name__ == '__main__':

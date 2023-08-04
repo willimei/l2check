@@ -46,9 +46,10 @@ class VlanHopping(Attack):
     def __init__(self,
                  interfaces: list[scapy.NetworkInterface],
                  ip4network: ipaddress.IPv4Network,
-                 native_vlan,
-                 victim_vlan,
-                 victim_ip):
+                 victim_ip = '192.168.3.4',
+                 native_vlan: int = 1 ,
+                 victim_vlan: int = 2,
+                 ):
         super().__init__(interfaces, ip4network)
         self.native_vlan = native_vlan
         self.victim_vlan = victim_vlan
