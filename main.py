@@ -109,9 +109,9 @@ def main():
         attack_instance = attack_class(l2check.Interfaces, l2check.ip4network)
         try:
             result = attack_instance.run()
+            print(f'{attack}: {result}')
         except RuntimeError as err:
-            print(err)
-        print(f'{attack}: {result}')
+            print(f'{attack}: {err}')
 
 
 if __name__ == '__main__':
