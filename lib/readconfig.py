@@ -1,32 +1,20 @@
 import os
-import sys
+import yaml
 
 
-def read_file_lines(filename):
-    f = open(filename, 'r')
-    lines = []
-    for line in f.readlines():
-        line = line.strip('\r\n')
-        lines.append(line)
-    f.close()
-    return lines
-
-
-def main():
-    if len(sys.argv) == 2:
-        filename = sys.argv[1]
-        if not os.path.isfile(filename):
-            print(filename + ' does not exist')
-            exit(1)
-        elif not os.access(filename, os.R_OK):
-            print(filename + ' access denied')
-            exit(1)
-        else:
-            read_file_lines(filename)
-            exit(1)
+def read_yaml_file(filename) -> dict:
+    if not os.path.isfile(filename):
+        print(filename + ' does not exist')
+        exit(1)
+    elif not os.access(filename, os.R_OK):
+        print(filename + ' access denied')
+        exit(1)
     else:
-        print('Provide interface config!')
+        with open(filename, 'r') as file:
+            try:
+                config = yaml.safe_load(file)
+            except yaml.YAMLError as err:
+                print(err)
 
+    return config
 
-if __name__ == '__main__':
-    main()

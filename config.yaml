@@ -1,0 +1,12 @@
+interfaces:
+  - enp1s0f0
+  - enp1s0f1
+  - enp3s0f0
+  - enp3s0f1
+
+attacks:
+  - ArpCachePoison
+  - VlanHopping
+  - DHCPStarvation
+  - DHCPServer
+  - STProot

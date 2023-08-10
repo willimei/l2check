@@ -12,9 +12,9 @@ import netns
 
 class L2CheckSuite:
 
-    def initialize(self, configfilename):
+    def initialize(self):
         ipr = IPRoute()
-        interfaces = read_file_lines(configfilename)
+        interfaces = self.config["interfaces"]
         for index, (ifname, ip) in enumerate(zip(interfaces, self.ip4network.hosts())):
             namespace = f'host{index}'
 
@@ -83,6 +83,16 @@ class L2CheckSuite:
 
         raise error
 
+    def run(self):
+        for attack in self.config["attacks"]:
+            attack_class = getattr(importlib.import_module('attacks.'+attack), attack)
+            attack_instance = attack_class(self.Interfaces, self.ip4network)
+            try:
+                result = attack_instance.run()
+                print(f'{attack}: {result}')
+            except RuntimeError as err:
+                print(f'{attack}: {err}')
+
     def teardown(self):
         for index, (interface, ip) in enumerate(zip(self.Interfaces, self.ip4network.hosts())):
             namespace = f'host{index}'
@@ -91,27 +101,20 @@ class L2CheckSuite:
             pyrouteNetns.remove(namespace)
 
 
-    def __init__(self, configfile: str = 'config.txt', dhcp: bool = False):
+    def __init__(self, configfile: str = 'config.yaml', dhcp: bool = False):
         self.Interfaces = []
         self.ip4network = ipaddress.ip_network('192.168.3.0/24')
         self.dhcp = dhcp
-        self.initialize(configfile)
+        self.config = read_yaml_file(configfile)
+        self.initialize()
         self.check_base_connectivity()
 
     def __del__(self):
         self.teardown()
 
 def main():
-    l2check = L2CheckSuite('config.txt')
-    attacks = read_file_lines('attacks.txt')
-    for attack in attacks:
-        attack_class = getattr(importlib.import_module('attacks.'+attack), attack)
-        attack_instance = attack_class(l2check.Interfaces, l2check.ip4network)
-        try:
-            result = attack_instance.run()
-            print(f'{attack}: {result}')
-        except RuntimeError as err:
-            print(f'{attack}: {err}')
+    l2check = L2CheckSuite('config.yaml')
+    l2check.run()
 
 
 if __name__ == '__main__':
