@@ -15,7 +15,7 @@ class L2CheckSuite:
     def initialize(self):
         ipr = IPRoute()
         interfaces = self.config["interfaces"]
-        for index, (ifname, ip) in enumerate(zip(interfaces, self.ip4network.hosts())):
+        for index, (ifname, ip) in enumerate(zip(interfaces.keys(), self.ip4network.hosts())):
             namespace = f'host{index}'
 
             pyrouteNetns.create(namespace)

@@ -1,8 +1,13 @@
 interfaces:
-  - enp1s0f0
-  - enp1s0f1
-  - enp3s0f0
-  - enp3s0f1
+  enp1s0f0:
+    pvid: 1
+  enp1s0f1:
+    pvid: 1
+    tagged_vlans: [1,2]
+  enp3s0f0:
+    pvid: 2
+  enp3s0f1:
+      pvid: 1
 
 attacks:
   - ArpCachePoison
