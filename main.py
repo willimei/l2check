@@ -23,7 +23,7 @@ class L2CheckSuite:
             ipr.link('set', index=ifindex, net_ns_fd=namespace)
 
             ifup(ifname, namespace)
-            if self.dhcp:
+            if self.config.get('dhcp'):
                 start_dhclient(ifname, namespace)
             else:
                 add_ip(ifname, ip, self.ip4network.prefixlen, namespace)
@@ -97,7 +97,7 @@ class L2CheckSuite:
     def teardown(self):
         for index, (interface, ip) in enumerate(zip(self.Interfaces, self.ip4network.hosts())):
             namespace = f'host{index}'
-            if self.dhcp:
+            if self.config.get('dhcp'):
                 stop_dhclient(interface.name, namespace)
             pyrouteNetns.remove(namespace)
 
@@ -107,11 +107,15 @@ class L2CheckSuite:
             or self.config.get('interfaces') is None:
             raise SystemExit('Invalid Config: Mandatory section "attacks" or "interfaces" does not exist.')
 
-    def __init__(self, configfile: str = 'config.yaml', dhcp: bool = False):
+    def __init__(self, configfile: str = 'config.yaml'):
         self.Interfaces = []
-        self.ip4network = ipaddress.ip_network('192.168.3.0/24')
-        self.dhcp = dhcp
         self.config = read_yaml_file(configfile)
+        if self.config.get('ip4network') is None:
+            self.ip4network = ipaddress.ip_network('192.168.3.0/24')
+        else:
+            self.ip4network = ipaddress.ip_network(self.config.get('ip4network'))
+        if self.config.get('use_dhcp') is None:
+            self.config['dhcp'] = False
         self.initialize()
         self.check_base_connectivity()
 

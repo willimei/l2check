@@ -9,6 +9,9 @@ interfaces:
   enp3s0f1:
       pvid: 2
 
+use_dhcp: False
+ip4network: '192.168.3.0/24'
+
 attacks:
   - name: ArpCachePoison
   - name: VlanHopping
