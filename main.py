@@ -87,7 +87,7 @@ class L2CheckSuite:
         for attack_config in self.config.get("attacks"):
             attack_name = attack_config.get("name")
             attack_class = getattr(importlib.import_module('attacks.'+attack_name), attack_name)
-            attack_instance = attack_class(self.Interfaces, self.ip4network)
+            attack_instance = attack_class(attack_config, self.Interfaces, self.ip4network)
             try:
                 result = attack_instance.run()
                 print(f'{attack_name}: {result}')

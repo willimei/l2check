@@ -10,8 +10,8 @@ class DHCPServer(Attack):
     This Attacks runs a DHCP server and checks im clients get leases from it.
     """
 
-    def __init__(self, interfaces: list[scapy.NetworkInterface], ip4network: ipaddress.IPv4Network):
-        super().__init__(interfaces, ip4network)
+    def __init__(self, config: dict, interfaces: list[scapy.NetworkInterface], ip4network: ipaddress.IPv4Network):
+        super().__init__(config, interfaces, ip4network)
         self.dhcp_server = None
         self.victim_if = self.interfaces[1]
         self.attack_if = self.interfaces[0]

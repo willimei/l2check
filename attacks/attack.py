@@ -4,7 +4,8 @@ import ipaddress
 
 class Attack(metaclass=abc.ABCMeta):
 
-    def __init__(self, interfaces: list[scapy.NetworkInterface], ip4network: ipaddress.IPv4Network):
+    def __init__(self, config:dict, interfaces: list[scapy.NetworkInterface], ip4network: ipaddress.IPv4Network):
+        self.config = config
         self.interfaces = interfaces
         self.ip4network = ip4network
 

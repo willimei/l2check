@@ -12,6 +12,9 @@ interfaces:
 attacks:
   - name: ArpCachePoison
   - name: VlanHopping
+    victim_ip: '192.168.3.4'
+    native_vlan: 1
+    victim_vlan: 2
   - name: DHCPStarvation
   - name: DHCPServer
   - name: STProot
