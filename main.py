@@ -14,7 +14,7 @@ class L2CheckSuite:
 
     def initialize(self):
         ipr = IPRoute()
-        interfaces = self.config["interfaces"]
+        interfaces = self.config.get("interfaces")
         for index, (ifname, ip) in enumerate(zip(interfaces.keys(), self.ip4network.hosts())):
             namespace = f'host{index}'
 
@@ -84,14 +84,15 @@ class L2CheckSuite:
         raise error
 
     def run(self):
-        for attack in self.config["attacks"]:
-            attack_class = getattr(importlib.import_module('attacks.'+attack), attack)
+        for attack_config in self.config.get("attacks"):
+            attack_name = attack_config.get("name")
+            attack_class = getattr(importlib.import_module('attacks.'+attack_name), attack_name)
             attack_instance = attack_class(self.Interfaces, self.ip4network)
             try:
                 result = attack_instance.run()
-                print(f'{attack}: {result}')
+                print(f'{attack_name}: {result}')
             except RuntimeError as err:
-                print(f'{attack}: {err}')
+                print(f'{attack_name}: {err}')
 
     def teardown(self):
         for index, (interface, ip) in enumerate(zip(self.Interfaces, self.ip4network.hosts())):
@@ -100,6 +101,11 @@ class L2CheckSuite:
                 stop_dhclient(interface.name, namespace)
             pyrouteNetns.remove(namespace)
 
+
+    def check_config(self):
+        if self.config.get('attacks') is None \
+            or self.config.get('interfaces') is None:
+            raise SystemExit('Invalid Config: Mandatory section "attacks" or "interfaces" does not exist.')
 
     def __init__(self, configfile: str = 'config.yaml', dhcp: bool = False):
         self.Interfaces = []

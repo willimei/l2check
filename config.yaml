@@ -3,15 +3,15 @@ interfaces:
     pvid: 1
   enp1s0f1:
     pvid: 1
-    tagged_vlans: [1,2]
+    tagged_vlans: [1]
   enp3s0f0:
-    pvid: 2
+    pvid: 1
   enp3s0f1:
-      pvid: 1
+      pvid: 2
 
 attacks:
-  - ArpCachePoison
-  - VlanHopping
-  - DHCPStarvation
-  - DHCPServer
-  - STProot
+  - name: ArpCachePoison
+  - name: VlanHopping
+  - name: DHCPStarvation
+  - name: DHCPServer
+  - name: STProot
