@@ -29,9 +29,13 @@ class L2CheckSuite:
                 add_ip(ifname, ip, self.ip4network.prefixlen, namespace)
 
             with netns.NetNS(nsname=namespace):
-                scapy.config.conf.ifaces.reload()
-                scapy.config.conf.route.resync()
-                intf = scapy.interfaces.dev_from_networkname(ifname)
+                while True:
+                    scapy.config.conf.ifaces.reload()
+                    scapy.config.conf.route.resync()
+                    intf = scapy.interfaces.dev_from_networkname(ifname)
+                    if intf.ips[6]:
+                        break
+
                 self.Interfaces.append(intf)
 
         ipr.close()
