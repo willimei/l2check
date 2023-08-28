@@ -21,8 +21,8 @@ def arping(interfaces: list[scapy.NetworkInterface], ifindex: int, ip: ipaddress
     with netns.NetNS(nsname=f'host{ifindex}'):
         scapy.conf.ifaces.reload()
         scapy.conf.route.resync()
-        p = scapy.Ether(dst='ff:ff:ff:ff:ff:ff')/scapy.ARP(pdst=str(ip))
-        ans, _ = scapy.srp(p, iface=interfaces[ifindex], timeout=2)
+        packet = scapy.Ether(dst='ff:ff:ff:ff:ff:ff')/scapy.ARP(pdst=str(ip))
+        ans, _ = scapy.srp(packet, iface=interfaces[ifindex], timeout=2)
 
         return ans
 
@@ -30,7 +30,8 @@ def icmping(interfaces: list[scapy.NetworkInterface], ifindex: int, ip: ipaddres
     with netns.NetNS(nsname=f'host{ifindex}'):
         scapy.conf.ifaces.reload()
         scapy.conf.route.resync()
-        ans, _ = scapy.srloop(scapy.IP(dst=ip)/scapy.ICMP(), timeout=3,count=count, retry=retry)
+        packet = scapy.IP(dst=ip)/scapy.ICMP()
+        ans, _ = scapy.srloop(packet, timeout=3,count=count, retry=retry)
 
         return ans
 
