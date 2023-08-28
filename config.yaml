@@ -21,3 +21,4 @@ attacks:
   - name: DHCPStarvation
   - name: DHCPServer
   - name: STProot
+  - name: NDNASpoofing
