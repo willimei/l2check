@@ -1,6 +1,6 @@
 import importlib
 import time
-
+import tabulate
 from lib.readconfig import *
 from lib.interfaces import *
 from lib.connectivity import *
@@ -89,14 +89,22 @@ class L2CheckSuite:
 
     def run(self):
         for attack_config in self.config.get("attacks"):
+            start_time = time.time()
             attack_name = attack_config.get("name")
             attack_class = getattr(importlib.import_module('attacks.'+attack_name), attack_name)
             attack_instance = attack_class(attack_config, self.Interfaces, self.ip4network)
             try:
                 result = attack_instance.run()
+                end_time = time.time()
+                self.Results.append({'name': attack_name, 'state': 'success', 'result': result, 'duration': end_time-start_time})
                 print(f'{attack_name}: {result}')
             except RuntimeError as err:
+                end_time = time.time()
+                self.Results.append({'name': attack_name, 'state': 'error', 'result': err, 'duration': end_time-start_time})
                 print(f'{attack_name}: {err}')
+
+    def print_results(self):
+        print(tabulate.tabulate(self.Results, headers='keys'))
 
     def teardown(self):
         for index, (interface, ip) in enumerate(zip(self.Interfaces, self.ip4network.hosts())):
@@ -113,6 +121,7 @@ class L2CheckSuite:
 
     def __init__(self, configfile: str = 'config.yaml'):
         self.Interfaces = []
+        self.Results = []
         self.config = read_yaml_file(configfile)
         if self.config.get('ip4network') is None:
             self.ip4network = ipaddress.ip_network('192.168.3.0/24')
@@ -129,6 +138,7 @@ class L2CheckSuite:
 def main():
     l2check = L2CheckSuite('config.yaml')
     l2check.run()
+    l2check.print_results()
 
 
 if __name__ == '__main__':
