@@ -9,7 +9,7 @@ interfaces:
   enp3s0f1:
       pvid: 2
 
-use_dhcp: False
+dhcp: True
 ip4network: '192.168.3.0/24'
 verbosity: 0
 

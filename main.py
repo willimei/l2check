@@ -30,13 +30,22 @@ class L2CheckSuite:
             else:
                 add_ip(ifname, ip, self.ip4network.prefixlen, namespace)
 
+            dhcp_timeout = 0
             with netns.NetNS(nsname=namespace):
                 while True:
                     scapy.config.conf.ifaces.reload()
                     scapy.config.conf.route.resync()
                     intf = scapy.interfaces.dev_from_networkname(ifname)
-                    if intf.ips[6]:
-                        break
+
+                    if intf.ip is None:
+                        if dhcp_timeout > self.config.get('dhcp_timeout'):
+                            print(f'DHCP Server does not answer on interface {ifname}. Configuring static IP.')
+                            add_ip(ifname, ip, self.ip4network.prefixlen, namespace)
+                        else:
+                            time.sleep(1)
+                            dhcp_timeout += 1
+                    elif intf.ips[6]:
+                         break
 
                 self.Interfaces.append(intf)
 
@@ -133,8 +142,10 @@ class L2CheckSuite:
             self.ip4network = ipaddress.ip_network('192.168.3.0/24')
         else:
             self.ip4network = ipaddress.ip_network(self.config.get('ip4network'))
-        if self.config.get('use_dhcp') is None:
+        if self.config.get('dhcp') is None:
             self.config['dhcp'] = False
+        if self.config.get('dhcp_timeout') is None:
+            self.config['dhcp_timeout'] = 10
         self.initialize()
         self.check_base_connectivity()
 
