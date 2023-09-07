@@ -11,6 +11,7 @@ interfaces:
 
 use_dhcp: False
 ip4network: '192.168.3.0/24'
+verbosity: 0
 
 attacks:
   - name: ArpCachePoison

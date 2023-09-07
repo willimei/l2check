@@ -1,6 +1,8 @@
 import importlib
 import time
 import tabulate
+import logging
+logging.getLogger("scapy").setLevel(logging.ERROR)
 from lib.readconfig import *
 from lib.interfaces import *
 from lib.connectivity import *
@@ -96,11 +98,11 @@ class L2CheckSuite:
             try:
                 result = attack_instance.run()
                 end_time = time.time()
-                self.Results.append({'name': attack_name, 'state': 'success', 'result': result, 'duration': end_time-start_time})
+                self.Results.append({'name': attack_name, 'validation': 'success', 'vulnerable': result, 'duration': end_time-start_time})
                 print(f'{attack_name}: {result}')
             except RuntimeError as err:
                 end_time = time.time()
-                self.Results.append({'name': attack_name, 'state': 'error', 'result': err, 'duration': end_time-start_time})
+                self.Results.append({'name': attack_name, 'validation': f'error: {err}', 'vulnerable': 'unknown', 'duration': end_time-start_time})
                 print(f'{attack_name}: {err}')
 
     def print_results(self):
@@ -123,6 +125,10 @@ class L2CheckSuite:
         self.Interfaces = []
         self.Results = []
         self.config = read_yaml_file(configfile)
+        if self.config.get('verbosity') is None:
+            scapy.config.conf.verb = 0
+        else:
+            scapy.config.conf.verb = self.config.get('verbosity')
         if self.config.get('ip4network') is None:
             self.ip4network = ipaddress.ip_network('192.168.3.0/24')
         else:
