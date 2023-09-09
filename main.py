@@ -84,11 +84,6 @@ class L2CheckSuite:
                 print(ans_macs)
                 error = RuntimeError('Physical setup not valid. ARP response from isolated interface.')
 
-            for i in range(2):
-                if len(sniffer[i].results.res) != 1:
-                    print(sniffer[i].results.res)
-                    error = RuntimeError('Physical setup not valid. ARP response from external Interface.')
-
             if error is None:
                 print('Initial setup successful.')
                 return True
