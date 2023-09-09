@@ -24,7 +24,7 @@ class DHCPStarvation(Attack):
         """
         ans = self.dhcp_request(nsname='host0')
         ans2 = self._check_second_interface()
-        if ans is None:
+        if ans is None or ans2 is None:
             return False
         else:
             return True

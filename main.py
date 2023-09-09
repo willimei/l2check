@@ -26,11 +26,10 @@ class L2CheckSuite:
 
             ifup(ifname, namespace)
             if self.config.get('dhcp'):
-                start_dhclient(ifname, namespace)
+                start_dhclient(ifname, namespace, type(self).__name__)
             else:
                 add_ip(ifname, ip, self.ip4network.prefixlen, namespace)
 
-            dhcp_timeout = 0
             with netns.NetNS(nsname=namespace):
                 while True:
                     scapy.config.conf.ifaces.reload()
@@ -38,12 +37,8 @@ class L2CheckSuite:
                     intf = scapy.interfaces.dev_from_networkname(ifname)
 
                     if intf.ip is None:
-                        if dhcp_timeout > self.config.get('dhcp_timeout'):
-                            print(f'DHCP Server does not answer on interface {ifname}. Configuring static IP.')
-                            add_ip(ifname, ip, self.ip4network.prefixlen, namespace)
-                        else:
-                            time.sleep(1)
-                            dhcp_timeout += 1
+                        print(f'DHCP Server does not answer on interface {ifname}. Configuring static IP.')
+                        add_ip(ifname, ip, self.ip4network.prefixlen, namespace)
                     elif intf.ips[6]:
                          break
 
@@ -116,7 +111,7 @@ class L2CheckSuite:
         for index, (interface, ip) in enumerate(zip(self.Interfaces, self.ip4network.hosts())):
             namespace = f'host{index}'
             if self.config.get('dhcp'):
-                stop_dhclient(interface.name, namespace)
+                stop_dhclient(interface.name, namespace, type(self).__name__)
             pyrouteNetns.remove(namespace)
 
 
@@ -139,8 +134,6 @@ class L2CheckSuite:
             self.ip4network = ipaddress.ip_network(self.config.get('ip4network'))
         if self.config.get('dhcp') is None:
             self.config['dhcp'] = False
-        if self.config.get('dhcp_timeout') is None:
-            self.config['dhcp_timeout'] = 10
         self.initialize()
         self.check_base_connectivity()
 
