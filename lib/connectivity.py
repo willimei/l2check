@@ -10,6 +10,7 @@ def arping_neighbors(interface: scapy.NetworkInterface, namespace: str, ip4netwo
         p = scapy.Ether(dst='ff:ff:ff:ff:ff:ff')/scapy.ARP(pdst=ip4network.with_prefixlen)
         ans, unans = scapy.srp(p,
                          iface=interface,
+                         inter=0.1,
                          timeout=2)
         print(ans)
         print(unans)
