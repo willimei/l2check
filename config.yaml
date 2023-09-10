@@ -15,15 +15,22 @@ verbosity: 0
 
 attacks:
   - name: ArpCachePoison
-  - name: VlanHopping
+    module: ArpCachePoison
+  - name: VlanHopping1
+    module: VlanHopping
     victim_ip: '192.168.3.4'
     native_vlan: 1
     victim_vlan: 2
-  - name: VlanHopping
+  - name: VlanHopping0
+    module: VlanHopping
     victim_ip: '192.168.3.4'
     native_vlan: 0
     victim_vlan: 2
   - name: DHCPStarvation
+    module: DHCPStarvation
   - name: DHCPServer
+    module: DHCPServer
   - name: STProot
+    module: STProot
   - name: NDNASpoofing
+    module: NDNASpoofing
