@@ -15,7 +15,7 @@ class DHCPStarvation(Attack):
             scapy.conf.ifaces.reload()
             scapy.conf.route.resync()
             scapy.conf.checkIPaddr = False
-            return scapy.dhcp_request(hw=hw, timeout=timeout, *args, **kwargs)
+            return scapy.dhcp_request(hw=hw, timeout=timeout, retry=2, *args, **kwargs)
 
     def setup(self) -> bool:
         """
