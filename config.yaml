@@ -30,7 +30,7 @@ attacks:
     module: DHCPStarvation
   - name: DHCPServer
     module: DHCPServer
-  - name: STProot
-    module: STProot
   - name: NDNASpoofing
     module: NDNASpoofing
+  - name: STProot
+    module: STProot
