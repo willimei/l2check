@@ -26,8 +26,12 @@ attacks:
     victim_ip: '192.168.3.4'
     native_vlan: 0
     victim_vlan: 2
-  - name: DHCPStarvation
+  - name: DHCPStarvationMAC
     module: DHCPStarvation
+    identifier: mac
+  - name: DHCPStarvationClientID
+    module: DHCPStarvation
+    identifier: clientID
   - name: DHCPServer
     module: DHCPServer
   - name: NDNASpoofing
