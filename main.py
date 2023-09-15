@@ -88,6 +88,13 @@ class L2CheckSuite:
 
         raise error
 
+    def renew_bindings(self):
+        for index, intf in enumerate(self.Interfaces):
+            namespace = f'host{index}'
+            if self.config.get('dhcp'):
+                renew_dhclient(intf.name, namespace, type(self).__name__)
+
+
     def run(self):
         for attack_config in self.config.get("attacks"):
             start_time = time.time()
@@ -104,6 +111,7 @@ class L2CheckSuite:
                 end_time = time.time()
                 self.Results.append({'name': attack_name, 'validation': f'error: {err}', 'vulnerable': 'unknown', 'duration': end_time-start_time})
                 print(f'{attack_name}: {err}')
+            self.renew_bindings()
 
     def print_results(self):
         print(tabulate.tabulate(self.Results, headers='keys'))

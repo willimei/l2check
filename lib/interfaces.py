@@ -24,6 +24,14 @@ def stop_dhclient(ifname: str, namespace: str, classname: str):
         subprocess.run(['dhclient', '-pf', f'/var/run/dhclient-{namespace}-{classname}.pid', '-r', ifname], check=True)
     os.remove(f'/tmp/dhclient-{namespace}-{classname}.leases')
 
+def renew_dhclient(ifname: str, namespace: str, classname: str):
+    with netns.NetNS(nsname=namespace):
+        subprocess.run(['dhclient', '-pf', f'/var/run/dhclient-{namespace}-{classname}.pid', '-r', ifname], check=True)
+        subprocess.run(['dhclient',
+                        '-pf', f'/var/run/dhclient-{namespace}-{classname}.pid',
+                        '-lf', f'/tmp/dhclient-{namespace}-{classname}.leases',
+                        ifname], check=True)
+
 def all_ifup_netns(namespace: str):
     with netns.NetNS(nsname=namespace):
         with NDB(log='on') as ndb:
