@@ -37,7 +37,7 @@ class L2CheckSuite:
                     intf = scapy.interfaces.dev_from_networkname(ifname)
 
                     if intf.ip is None:
-                        print(f'DHCP Server does not answer on interface {ifname}. Configuring static IP.')
+                        self.print_debug(f'DHCP Server does not answer on interface {ifname}. Configuring static IP.')
                         add_ip(ifname, ip, self.ip4network.prefixlen, namespace)
                     elif intf.ips[6]:
                          break
@@ -45,7 +45,7 @@ class L2CheckSuite:
                 self.Interfaces.append(intf)
 
         ipr.close()
-        print('Initialization successful.')
+        self.print_debug('Initialization successful.')
 
 
     def check_base_connectivity(self):
@@ -72,15 +72,15 @@ class L2CheckSuite:
                 ans_macs.append(res.answer.src)
             if (not ans_macs.__contains__(self.Interfaces[1].mac)) or \
                     (not ans_macs.__contains__(self.Interfaces[2].mac)):
-                print(ans_macs)
+                self.print_debug(ans_macs)
                 error = RuntimeError('Physical setup not valid. No ARP response.')
 
             if (ans_macs.__contains__(self.Interfaces[3].mac)) and (len(sniffer[2].results.res) != 0):
-                print(ans_macs)
+                self.print_debug(ans_macs)
                 error = RuntimeError('Physical setup not valid. ARP response from isolated interface.')
 
             if error is None:
-                print('Initial setup successful.')
+                self.print_debug('Initial setup successful.')
                 return True
 
             retry_count += 1
@@ -106,12 +106,16 @@ class L2CheckSuite:
                 result = attack_instance.run()
                 end_time = time.time()
                 self.Results.append({'name': attack_name, 'validation': 'success', 'vulnerable': result, 'duration': end_time-start_time})
-                print(f'{attack_name}: {result}')
+                self.print_debug(f'{attack_name}: {result}')
             except RuntimeError as err:
                 end_time = time.time()
                 self.Results.append({'name': attack_name, 'validation': f'error: {err}', 'vulnerable': 'unknown', 'duration': end_time-start_time})
-                print(f'{attack_name}: {err}')
+                self.print_debug(f'{attack_name}: {err}')
             self.renew_bindings()
+
+    def print_debug(self, text:str):
+        if self.Verbosity != 0:
+            print(text)
 
     def print_results(self):
         print(tabulate.tabulate(self.Results, headers='keys'))
@@ -134,9 +138,11 @@ class L2CheckSuite:
         self.Results = []
         self.config = read_yaml_file(configfile)
         if self.config.get('verbosity') is None:
+            self.Verbosity = 0
             scapy.config.conf.verb = 0
         else:
-            scapy.config.conf.verb = self.config.get('verbosity')
+            self.Verbosity = self.config.get('verbosity')
+            scapy.config.conf.verb = self.Verbosity
         if self.config.get('ip4network') is None:
             self.ip4network = ipaddress.ip_network('192.168.3.0/24')
         else:
