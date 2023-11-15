@@ -26,8 +26,6 @@ class VlanHopping(Attack):
 
     def result(self) -> bool:
         self.sniff.stop()
-        print('VLAN Sniffing result:')
-        print(self.sniff.results.res)
         for result in self.sniff.results.res:
             if result.dst == self.etherdst \
                 and result.src == self.ethersrc \

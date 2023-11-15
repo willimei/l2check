@@ -27,10 +27,8 @@ class ArpCachePoison(Attack):
             cache0 = ipr.get_neighbours(dst=self.interfaces[0].ip, lladdr=self.interfaces[2].mac)
 
         if len(cache0) > 0:
-            print('Cache poison successful.')
             return True
         else:
-            print('Cache poison not successful.')
             return False
 
     def run(self) -> bool:

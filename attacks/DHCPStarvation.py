@@ -137,14 +137,11 @@ class DHCPStarvation(Attack):
         """
         if not self.setup():
             raise RuntimeError("No answering DHCP Server in the network.")
-        print("DHCP Discover success!")
         num_leases = self.attack(5)
-        print(f"{num_leases} DHCP Leases acquired.")
+        #print(f"{num_leases} DHCP Leases acquired.")
         notempty = self._check_second_interface()
         if notempty:
-            print('Probably rate limited')
             return False
         else:
-            print('DHCP Pool exhausted')
             return True
 

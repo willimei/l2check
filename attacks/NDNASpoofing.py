@@ -82,8 +82,6 @@ class NDNASpoofing(Attack):
             with netns.NetNS(nsname=f'host{self.attack_host_num}'):
                 scapy.sendp(rep, iface=self.interfaces[self.attack_host_num], verbose=0)
 
-            print("Reply NA for target address %s (received from %s)" % (tgt, mac))
-
         sniff_filter = f"icmp6 and ether src {self.victim_interface.mac}"
         self.na_spoofer = get_async_sniffer(self.interfaces,
                                     self.attack_host_num,

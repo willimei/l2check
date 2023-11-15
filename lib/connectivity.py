@@ -12,9 +12,9 @@ def arping_neighbors(interface: scapy.NetworkInterface, namespace: str, ip4netwo
                          iface=interface,
                          inter=0.1,
                          timeout=2)
-        print(ans)
-        print(unans)
-        print(ans.summary(lambda s,r: r.sprintf("%Ether.src% %ARP.psrc%")))
+        #print(ans)
+        #print(unans)
+        #print(ans.summary(lambda s,r: r.sprintf("%Ether.src% %ARP.psrc%")))
 
         return ans
 
