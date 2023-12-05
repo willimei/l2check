@@ -104,7 +104,9 @@ class NDNASpoofing(Attack):
             ipr.neigh('del',dst=self.destination_interface.ips[6][0], ifindex=self.victim_interface.index)
 
         with netns.NetNS(nsname=f'host{self.victim_host_num}'):
-            subprocess.run(['ping', '-c', '3', f'{self.destination_interface.ips[6][0]}'])
+            subprocess.run(['ping', '-c', '3', f'{self.destination_interface.ips[6][0]}'],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL)
 
 
     def result(self) -> bool:
